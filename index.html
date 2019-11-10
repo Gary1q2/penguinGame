@@ -1,0 +1,42 @@
+<html>
+	<head>
+		<title>Penguin game</title>
+	</head>
+	<body>
+		<canvas id="canvas" height="600" width="800" style="border: 2px solid black"></canvas>
+	</body>
+	<script src="class.js"></script>
+	<script src="keyboard.js"></script>
+
+<script>
+
+var gameTick = 60;
+var ctx = document.getElementById("canvas").getContext('2d');
+ctx.fillText("hii", 50, 50);
+
+var pressLeft = false;
+var pressRight = false;
+
+
+
+
+window.onload = function() {
+
+	console.log("Window loaded");
+
+	var lol = new Image();
+	lol.src = "penguin.png";
+	var obj = new Entity(70, 70, lol);
+
+	var player = new Player(200, 200, lol);
+
+	setInterval(function() {
+		obj.update(); 
+		player.update();
+
+		console.log("Press left = " + pressLeft + "    Press right = " + pressRight);
+	}, 1000/gameTick);
+}
+
+</script>	
+</html>
