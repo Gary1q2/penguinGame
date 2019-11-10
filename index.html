@@ -12,30 +12,55 @@
 
 var gameTick = 60;
 var ctx = document.getElementById("canvas").getContext('2d');
-ctx.fillText("hii", 50, 50);
+
 
 var pressLeft = false;
 var pressRight = false;
 
+var lastFrameTimeMs = 0;
+var maxFPS = 60;
 
 
+var presArray = [];
 
 window.onload = function() {
 
 	console.log("Window loaded");
 
-	var lol = new Image();
-	lol.src = "penguin.png";
-	var obj = new Entity(70, 70, lol);
+	var img = new Image();
+	img.src = "penguin.png";
+	var player = new Player(200, 500, img);
 
-	var player = new Player(200, 200, lol);
+	var img2 = new Image();
+	img2.src = "present.png";
+	var present = new Present(300, 0, img2);
+	presArray.push(present);
 
-	setInterval(function() {
-		obj.update(); 
+	var wait = 0;
+
+	function gameLoop(timestamp) {
+
+		ctx.clearRect(0, 0, 800, 600);
+
+		if (wait <= 30) {
+			wait++;
+		} else {
+			presArray.push(new Present(Math.floor(Math.random()*500), -50, img2));
+			wait = 0;
+		}
+
 		player.update();
 
-		console.log("Press left = " + pressLeft + "    Press right = " + pressRight);
-	}, 1000/gameTick);
+		// Update position of all presents
+		for (var i = 0; i < presArray.length; i++) {
+			presArray[i].update()
+		}
+
+		requestAnimationFrame(gameLoop);
+	}
+
+	requestAnimationFrame(gameLoop);
+
 }
 
 </script>	
