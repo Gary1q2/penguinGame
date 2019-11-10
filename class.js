@@ -1,45 +1,187 @@
 // Just an entity/sprite with a position in the world
 class Entity {
-	constructor(x, y, img) {
+	constructor(x, y, width, height, img) {
 		this.x = x;
 		this.y = y;
+		this.width = width;
+		this.height = height;
 		this.img = img;
 	}
 	draw() {
-		ctx.drawImage(this.img, this.x, this.y);
+		ctx.drawImage(this.img,this.x-this.width/2,this.y-this.height/2);
+		ctx.beginPath();
+		ctx.rect(this.x-this.width/2,this.y-this.height/2,this.width,this.height);
+		ctx.stroke();
 	}
 	update() {
 		this.draw();
 	}
+
+	// Check collision with another object
+	collideWith(other) {
+		var rect1 = {
+			x: this.x - this.width/2,
+			y: this.y - this.height/2,
+			width: this.width,
+			height: this.height
+		};
+		var rect2 = {
+			x: other.x - other.width/2,
+			y: other.y - other.height/2,
+			width: other.width,
+			height: other.height
+		};
+		return testCollisionRectRect(rect1, rect2);
+	}
 }
 
-class Present extends Entity {
-	constructor(x, y, img) {
-		super(x, y, img);
+class Rock extends Entity {
+	constructor(x, y, width, height, img) {
+		super(x, y, img.width, img.height, img);
+		this.dead = false;
+		this.fallSpd = 2;
 	}
 	update() {
 		this.updateMovement();
+		this.checkLost();
 		super.update();
 	}
 
 	updateMovement() {
-		this.y += 5;
+		this.y +=  this.fallSpd;
+	}
+	checkLost() {
+	 	if (this.y >= 800 && !this.dead) {
+	 		this.dead = true;
+	 	}
+	}
+}
+
+class Present extends Entity {
+	constructor(x, y, width, height, img) {
+		super(x, y, img.width, img.height, img);
+		this.dead = false;
+		this.fallSpd = 3;
+		this.chuteSpd = 2;
+		this.hasChute = true;
+	}
+
+	update() {
+		this.updateMovement();
+		if (!this.dead) {
+	 		super.update();
+	 		if (this.hasChute) {
+		 		this.drawChute();
+		 	}
+	 	}
+		this.checkLost();
+
+	}
+
+	// Draw the parachute
+	drawChute() {
+		ctx.drawImage(chute, this.x-this.width/2, this.y-80);
+	}
+
+	// Make it fall down
+	updateMovement() {
+		if (this.hasChute) {
+			this.y += this.chuteSpd
+		} else {
+			this.y += this.fallSpd;
+		}
+	}
+
+	// Check if it reached the bottom
+	checkLost() {
+	 	if (this.y >= 800 && !this.dead) {
+	 		this.dead = true;
+	 		lost++;
+	 	}
+	}
+}
+
+class BluePresent extends Present {
+		constructor(x, y, width, height, img) {
+		super(x, y, img.width, img.height, img);
+		this.dead = false;
+		this.fallSpd = 4;
+	}
+
+	update() {
+		super.update();
+	}
+}
+
+class PurplePresent extends Present {
+		constructor(x, y, width, height, img) {
+		super(x, y, img.width, img.height, img);
+		this.dead = false;
+		this.fallSpd = 5;
+	}
+
+	update() {
+		super.update();
 	}
 }
 
 
 class Player extends Entity {
-	constructor(x, y, img) {
-		super(x, y, img);
-		this.maxSpd = 4;
-		this.accelSpd = 0.5;
+	constructor(x, y, width, height, img) {
+		super(x, y, width, height, img);
+		this.maxSpd = 6;
+		this.accelSpd = 0.4;
 		this.hsp = 0;
-		this.friction = 0.1;
+		this.friction = 0.08;
+
+		this.stunned = false;
+		this.stunTime = 120;
+		this.stunTimer = 0;
 	}
 	update() {
 		this.updateMovement();
-		super.update();
+
+
+		this.checkTouchRock();
+		this.tickStunTime();
+	
+		this.draw();
 	}
+
+	draw() {
+		if (this.stunned) {
+			ctx.drawImage(stunned, this.x-this.width/2,this.y-this.height/2);
+		} else {
+			ctx.drawImage(img, this.x-this.width/2,this.y-this.height/2);
+		}
+	}
+
+	tickStunTime() {
+		if (this.stunned) {
+			console.log("yes stunned");
+			if (this.stunTimer >= this.stunTime) {
+				this.stunned = false;
+				this.stunTimer = 0;
+				console.log("shud be false");
+			} else {
+				this.stunTimer++;
+				console.log("plussed");
+			}	
+		}
+	}
+
+	// Checks if player touched a rock
+	checkTouchRock() {
+		if (!this.stunned) {
+			for (var i = 0; i < rockArray.length; i++) {
+				if (rockArray[i].collideWith(this)) {
+					this.stunned = true;
+				} else {
+				}
+			}
+		}
+	}
+
 	// Accelerate player to max speed
 	applyAccelerate() {
 		if (pressLeft && !pressRight) {
@@ -74,11 +216,52 @@ class Player extends Entity {
 
 	// Update player movement
 	updateMovement() {
-		this.applyAccelerate();
-		this.x += this.hsp;
-		this.applyFriction();
-		// Correct to 1 decimal place
-		//this.x = +(this.x).toFixed(1);
-		//this.hsp = +(this.hsp).toFixed(1);
+		if (!this.stunned) {
+			this.applyAccelerate();
+			this.x += this.hsp;
+			this.applyFriction();
+		}
+	}
+}
+
+class Spawner {
+	constructor() {
+		this.numPres = 20;
+		this.numSpike = 5;
+		this.start = false;
+
+		this.delay = 200;
+		this.delayTimer = 0;		
+	}
+	update() {
+		if (this.start && (this.numPres > 0 || this.numSpike > 0)) {
+			if (this.delayTimer >= this.delay) {
+				this.delayTimer = 0;
+				
+				var temp = Math.random();
+				if (temp <= 0.3 && this.numSpike > 0) {
+					rockArray.push(new Rock(Math.floor(Math.random()*1200), 
+						        -50, spike.width, spike.height, spike));
+					this.numSpike--;
+					console.log("spawner - created a rock");
+				} else if (temp > 0.3 && this.numPres > 0) {
+					presArray.push(new Present(Math.floor(Math.random()*1200),
+				                 -50, img2.width, img2.height, img2));
+					this.numPres--;
+					console.log("spawner - created a present");
+
+				// Give a chance to repick it
+				} else {
+					this.delayTimer = this.delay;
+				}
+			} else {
+				this.delayTimer++;
+			}
+		}
+	}
+
+	startSpawn() {
+		console.log("Level 1 spawner started");
+		this.start = true;
 	}
 }
