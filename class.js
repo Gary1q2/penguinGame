@@ -39,7 +39,10 @@ class Rock extends Entity {
 	constructor(x, y, width, height, img) {
 		super(x, y, img.width, img.height, img);
 		this.dead = false;
+
 		this.fallSpd = 2;
+		this.maxSpd = 6;
+		this.gravity = 0.1;
 	}
 	update() {
 		this.updateMovement();
@@ -48,6 +51,9 @@ class Rock extends Entity {
 	}
 
 	updateMovement() {
+		if (this.fallSpd < this.maxSpd) {
+			this.fallSpd += this.gravity;
+		}
 		this.y +=  this.fallSpd;
 	}
 	checkLost() {
@@ -61,6 +67,10 @@ class Present extends Entity {
 	constructor(x, y, width, height, img) {
 		super(x, y, img.width, img.height, img);
 		this.dead = false;
+
+		this.maxSpd = 8;
+		this.gravity = 0.1;
+
 		this.fallSpd = 3;
 		this.chuteSpd = 2;
 		this.hasChute = true;
@@ -88,6 +98,9 @@ class Present extends Entity {
 		if (this.hasChute) {
 			this.y += this.chuteSpd
 		} else {
+			if (this.fallSpd < this.maxSpd) {
+				this.fallSpd += this.gravity;
+			}
 			this.y += this.fallSpd;
 		}
 	}
@@ -232,6 +245,8 @@ class Spawner {
 
 		this.delay = 200;
 		this.delayTimer = 0;		
+
+		this.lastPresX = 0;
 	}
 	update() {
 		if (this.start && (this.numPres > 0 || this.numSpike > 0)) {
@@ -240,12 +255,14 @@ class Spawner {
 				
 				var temp = Math.random();
 				if (temp <= 0.3 && this.numSpike > 0) {
-					rockArray.push(new Rock(Math.floor(Math.random()*1200), 
+
+					rockArray.push(new Rock(this.lastPresX-150+Math.floor(Math.random()*300), 
 						        -50, spike.width, spike.height, spike));
 					this.numSpike--;
 					console.log("spawner - created a rock");
 				} else if (temp > 0.3 && this.numPres > 0) {
-					presArray.push(new Present(Math.floor(Math.random()*1200),
+					this.lastPresX = Math.floor(Math.random()*1200); 
+					presArray.push(new Present(this.lastPresX,
 				                 -50, img2.width, img2.height, img2));
 					this.numPres--;
 					console.log("spawner - created a present");

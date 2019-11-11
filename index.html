@@ -15,6 +15,7 @@
 	</body>
 	<script src="class.js"></script>
 	<script src="keyboard.js"></script>
+	<script src="mouse.js"></script>
 
 <script>
 
@@ -40,6 +41,11 @@ var lost = 0;  // Number of presents dropped
 var level = 1;
 
 var gameState = "menu";
+
+var createType = "pres";
+
+
+
 var img = new Image();
 img.src = "img/penguin.png";
 var img2 = new Image();
@@ -116,6 +122,20 @@ function startGame() {
 			ctx.fillText("FPS: " + fps, 100, 750);
 			ctx.fillText("Level: " + level, 800, 750);
 			ctx.fillText("stunned="+ player.stunned, 950, 750);
+
+
+			// Draw spawnerrr
+			if (createType == "rock") {
+				ctx.drawImage(spike, 0, 0);
+			} else if (createType == "pres") {
+				ctx.drawImage(img2, 0, 0);
+			} else if (createType == "bluePres") {
+				ctx.drawImage(bluePres, 0, 0);
+			} else if (createType == "purplePres") {
+				ctx.drawImage(purplePres, 0, 0);
+			}
+			ctx.fillText("createType="+createType, 50, 20);
+
 
 		} else if (gameState == "lost") {
 			ctx.clearRect(0, 0, 1200, 800);
