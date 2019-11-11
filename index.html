@@ -108,9 +108,9 @@ function startGame() {
 			level1.update();
 			player.update();
 
-			// Update position of all presents
+			// Update position of all presents and let player collect them
 			for (var i = 0; i < presArray.length; i++) {
-				if (presArray[i].collideWith(player) && !presArray[i].dead) {
+				if (presArray[i].collideWith(player) && !presArray[i].dead && !player.stunned) {
 					presArray[i].dead = true;
 					num += 1;
 				} 

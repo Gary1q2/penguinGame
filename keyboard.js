@@ -63,7 +63,7 @@ document.onkeyup = function(event) {
 		// Press space to dash
 		case 32:
 			if (canDash) {
-				console.log("DASHED BOIZ");
+				//console.log("DASHED BOIZ");
 				canDash = false;
 				dashing = true;
 			}

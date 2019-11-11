@@ -68,12 +68,16 @@ class Present extends Entity {
 		super(x, y, img.width, img.height, img);
 		this.dead = false;
 
-		this.maxSpd = 8;
+		this.maxSpd = 6;
 		this.gravity = 0.1;
 
-		this.fallSpd = 3;
-		this.chuteSpd = 2;
+		this.chuteSpd = 1;
+		this.fallSpd = this.chuteSpd;
+	
 		this.hasChute = true;
+
+		this.chuteTime = 300;
+		this.chuteTimer = 0;
 	}
 
 	update() {
@@ -83,6 +87,13 @@ class Present extends Entity {
 	 		if (this.hasChute) {
 		 		this.drawChute();
 		 	}
+	 	}
+
+	 	if (this.hasChute) {
+	 		this.chuteTimer++;
+	 		if (this.chuteTimer >= this.chuteTime) {
+	 			this.hasChute = false;
+	 		}
 	 	}
 		this.checkLost();
 
@@ -118,7 +129,7 @@ class BluePresent extends Present {
 		constructor(x, y, width, height, img) {
 		super(x, y, img.width, img.height, img);
 		this.dead = false;
-		this.fallSpd = 4;
+		this.chuteTime = 200;
 	}
 
 	update() {
@@ -130,7 +141,7 @@ class PurplePresent extends Present {
 		constructor(x, y, width, height, img) {
 		super(x, y, img.width, img.height, img);
 		this.dead = false;
-		this.fallSpd = 5;
+		this.chuteTime = 100;
 	}
 
 	update() {
@@ -171,7 +182,7 @@ class Player extends Entity {
 				dashing = false;
 				canDash = true;
 				this.dashTimer = 0;
-				console.log("dashing done");
+				//console.log("dashing done");
 			}
 		}
 
@@ -184,9 +195,9 @@ class Player extends Entity {
 		} else {
 			if (dashing) {
 				if (this.facing == "left") {
-					ctx.drawImage(dash, this.x-this.width/2,this.y-this.height/2);
+					ctx.drawImage(dash, this.x-this.width/2,this.y-this.height/2+40);
 				} else {
-					ctx.drawImage(dashR, this.x-this.width/2,this.y-this.height/2);
+					ctx.drawImage(dashR, this.x-this.width/2,this.y-this.height/2+40);
 				}
 			} else {
 				if (this.facing == "left") {
@@ -205,14 +216,14 @@ class Player extends Entity {
 
 	tickStunTime() {
 		if (this.stunned) {
-			console.log("yes stunned");
+			//console.log("yes stunned");
 			if (this.stunTimer >= this.stunTime) {
 				this.stunned = false;
 				this.stunTimer = 0;
-				console.log("shud be false");
+				//console.log("shud be false");
 			} else {
 				this.stunTimer++;
-				console.log("plussed");
+				//console.log("plussed");
 			}	
 		}
 	}
@@ -223,6 +234,7 @@ class Player extends Entity {
 			for (var i = 0; i < rockArray.length; i++) {
 				if (rockArray[i].collideWith(this)) {
 					this.stunned = true;
+					this.hsp = 0;
 				} else {
 				}
 			}
@@ -282,7 +294,9 @@ class Player extends Entity {
 	updateMovement() {
 		if (!this.stunned) {
 			this.applyAccelerate();
-			this.x += this.hsp;
+			if (this.x+this.hsp >= 0 && this.x+this.hsp <= 1200) {
+				this.x += this.hsp;
+			}
 			this.applyFriction();
 		}
 	}
