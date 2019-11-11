@@ -58,5 +58,15 @@ document.onkeyup = function(event) {
 			for (var i = 0; i < presArray.length; i++) {
 				presArray[i].hasChute = false;
 			}
+			break;
+
+		// Press space to dash
+		case 32:
+			if (canDash) {
+				console.log("DASHED BOIZ");
+				canDash = false;
+				dashing = true;
+			}
+			break;
 	}
 }

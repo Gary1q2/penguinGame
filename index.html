@@ -45,9 +45,14 @@ var gameState = "menu";
 var createType = "pres";
 
 
+var canDash = true;
+var dashing = false;
+
 
 var img = new Image();
 img.src = "img/penguin.png";
+var pengR = new Image();
+pengR.src = "img/penguinR.png";
 var img2 = new Image();
 img2.src = "img/present.png";
 var bg = new Image();
@@ -62,6 +67,10 @@ var spike = new Image();
 spike.src = "img/spike.png";
 var stunned = new Image();
 stunned.src = "img/stunned.png";
+var dash = new Image();
+dash.src = "img/dash.png";
+var dashR = new Image();
+dashR.src = "img/dashR.png";
 
 function startGame() {
 
@@ -116,13 +125,15 @@ function startGame() {
 			if (lost >= 69) {
 				gameState = "lost";
 			}
+
+			// Draw some variables
 			ctx.font = "30px Arial";
 			ctx.fillText("Presents: " + num, 600, 750);
 			ctx.fillText("Lost: " + lost, 300, 750);
 			ctx.fillText("FPS: " + fps, 100, 750);
 			ctx.fillText("Level: " + level, 800, 750);
 			ctx.fillText("stunned="+ player.stunned, 950, 750);
-
+			ctx.fillText("facing ="+player.facing,800,600);
 
 			// Draw spawnerrr
 			if (createType == "rock") {
@@ -136,7 +147,7 @@ function startGame() {
 			}
 			ctx.fillText("createType="+createType, 50, 20);
 
-
+		// Lost the game state
 		} else if (gameState == "lost") {
 			ctx.clearRect(0, 0, 1200, 800);
 			document.getElementById('lostMsg').style.visibility = "visible";

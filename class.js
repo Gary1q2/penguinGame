@@ -143,21 +143,38 @@ class Player extends Entity {
 	constructor(x, y, width, height, img) {
 		super(x, y, width, height, img);
 		this.maxSpd = 6;
-		this.accelSpd = 0.4;
+		this.accelSpd = 0.8;
 		this.hsp = 0;
-		this.friction = 0.08;
+		this.friction = 0.2;
 
 		this.stunned = false;
 		this.stunTime = 120;
 		this.stunTimer = 0;
+
+
+		this.facing = "left";
+		this.dashTime = 20;
+		this.dashTimer = 0;
 	}
+
+
 	update() {
 		this.updateMovement();
-
 
 		this.checkTouchRock();
 		this.tickStunTime();
 	
+		if (dashing) {
+			if (this.dashTimer < this.dashTime) {
+				this.dashTimer++;
+			} else {
+				dashing = false;
+				canDash = true;
+				this.dashTimer = 0;
+				console.log("dashing done");
+			}
+		}
+
 		this.draw();
 	}
 
@@ -165,8 +182,25 @@ class Player extends Entity {
 		if (this.stunned) {
 			ctx.drawImage(stunned, this.x-this.width/2,this.y-this.height/2);
 		} else {
-			ctx.drawImage(img, this.x-this.width/2,this.y-this.height/2);
+			if (dashing) {
+				if (this.facing == "left") {
+					ctx.drawImage(dash, this.x-this.width/2,this.y-this.height/2);
+				} else {
+					ctx.drawImage(dashR, this.x-this.width/2,this.y-this.height/2);
+				}
+			} else {
+				if (this.facing == "left") {
+					ctx.drawImage(img, this.x-this.width/2,this.y-this.height/2);
+				} else {
+					ctx.drawImage(pengR, this.x-this.width/2,this.y-this.height/2);
+				}
+			}
 		}
+
+		// Draw collision boundary
+		ctx.beginPath();
+		ctx.rect(this.x-this.width/2,this.y-this.height/2,this.width,this.height);
+		ctx.stroke();
 	}
 
 	tickStunTime() {
@@ -197,15 +231,32 @@ class Player extends Entity {
 
 	// Accelerate player to max speed
 	applyAccelerate() {
-		if (pressLeft && !pressRight) {
-			this.hsp -= this.accelSpd;
-			if (this.hsp < -this.maxSpd) {
-				this.hsp = -this.maxSpd;
+		if (!dashing) {
+			if (pressLeft && !pressRight) {
+				this.facing = "left";
+				this.hsp -= this.accelSpd;
+				if (this.hsp < -this.maxSpd) {
+					this.hsp = -this.maxSpd;
+				}
+			
+			} else if (pressRight && !pressLeft) {
+				this.facing = "right";
+				this.hsp += this.accelSpd;
+				if (this.hsp > this.maxSpd) {
+					this.hsp = this.maxSpd;
+				}
 			}
-		} else if (pressRight && !pressLeft) {
-			this.hsp += this.accelSpd;
-			if (this.hsp > this.maxSpd) {
-				this.hsp = this.maxSpd;
+		} else {
+			if (this.facing == "left") {
+				this.hsp -= 2;
+				if (this.hsp < -10) {
+					this.hsp = -10;
+				}
+			} else {
+				this.hsp += 2;
+				if (this.hsp > 10) {
+					this.hsp = 10;
+				}
 			}
 		}
 	}
@@ -240,10 +291,10 @@ class Player extends Entity {
 class Spawner {
 	constructor() {
 		this.numPres = 20;
-		this.numSpike = 5;
+		this.numSpike = 12;
 		this.start = false;
 
-		this.delay = 200;
+		this.delay = 120;
 		this.delayTimer = 0;		
 
 		this.lastPresX = 0;
@@ -254,12 +305,13 @@ class Spawner {
 				this.delayTimer = 0;
 				
 				var temp = Math.random();
-				if (temp <= 0.3 && this.numSpike > 0) {
+				if (temp <= 0.45 && this.numSpike > 0) {
 
 					rockArray.push(new Rock(this.lastPresX-150+Math.floor(Math.random()*300), 
 						        -50, spike.width, spike.height, spike));
 					this.numSpike--;
 					console.log("spawner - created a rock");
+					this.deplayTimer = 100;
 				} else if (temp > 0.3 && this.numPres > 0) {
 					this.lastPresX = Math.floor(Math.random()*1200); 
 					presArray.push(new Present(this.lastPresX,
