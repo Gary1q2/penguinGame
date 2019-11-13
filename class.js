@@ -78,6 +78,8 @@ class Present extends Entity {
 
 		this.chuteTime = 300;
 		this.chuteTimer = 0;
+
+		this.hit = false;
 	}
 
 	update() {
@@ -99,6 +101,11 @@ class Present extends Entity {
 
 	}
 
+	hitUp() {
+		this.fallSpd = -7;
+		this.hit = true;
+	}
+
 	// Draw the parachute
 	drawChute() {
 		ctx.drawImage(chute, this.x-this.width/2, this.y-80);
@@ -106,14 +113,17 @@ class Present extends Entity {
 
 	// Make it fall down
 	updateMovement() {
+		if (this.hit && this.fallSpd >= 0) {
+			this.hit = false;
+		}
 		if (this.hasChute) {
-			this.y += this.chuteSpd
+			this.fallSpd = this.chuteSpd
 		} else {
 			if (this.fallSpd < this.maxSpd) {
 				this.fallSpd += this.gravity;
 			}
-			this.y += this.fallSpd;
 		}
+		this.y += this.fallSpd;
 	}
 
 	// Check if it reached the bottom
@@ -302,13 +312,81 @@ class Player extends Entity {
 	}
 }
 
+
+class MechSpawner {
+	constructor() {
+		this.mech = -1;
+		this.spawning = false;
+
+		this.timer = 0;
+	}
+	update() {
+		if (this.spawning) {
+			if (this.mech == 1) {
+				if (this.timer == 0) {
+					//create a green present
+					presArray.push(new Present(300, -50, img2.width, img2.height, img2));
+				} else if (this.timer == 50) {
+					//create blue present
+					presArray.push(new BluePresent(700, -50, bluePres.width, bluePres.height, bluePres));
+					this.spawning = false;
+					console.log("back to idle state");
+				}
+			} else if (this.mech == 2) {
+				if (this.mech2 <= 0.3) {
+					if (this.timer == 0) {
+						presArray.push(new Present(300, -50, img2.width, img2.height, img2));
+					} else if (this.timer == 50) {
+						presArray.push(new BluePresent(600, -50, bluePres.width, bluePres.height, bluePres));
+					} else if (this.timer == 100) {
+						presArray.push(new PurplePresent(900, -50, purplePres.width, purplePres.height, purplePres));
+						this.spawning = false;
+					}
+				} else if (this.mech2 > 0.3 && this.mech <= 0.6) {
+					if (this.timer == 0) {
+						presArray.push(new Present(600, -50, img2.width, img2.height, img2));
+					} else if (this.timer == 50) {
+						presArray.push(new BluePresent(300, -50, bluePres.width, bluePres.height, bluePres));
+					} else if (this.timer == 100) {
+						presArray.push(new PurplePresent(900, -50, purplePres.width, purplePres.height, purplePres));
+						this.spawning = false;
+					}				
+				} else {
+					if (this.timer == 0) {
+						presArray.push(new Present(900, -50, img2.width, img2.height, img2));
+					} else if (this.timer == 50) {
+						presArray.push(new BluePresent(300, -50, bluePres.width, bluePres.height, bluePres));
+					} else if (this.timer == 100) {
+						presArray.push(new PurplePresent(600, -50, purplePres.width, purplePres.height, purplePres));
+						this.spawning = false;
+					}		
+				}
+			}
+			this.timer++;
+		}
+	}
+	spawnMech(type) {
+		if (this.spawning) {
+			console.log("failed to spawn - spawn in progress");
+		} else {
+			this.mech = type;
+			this.spawning = true;
+			this.timer = 0;
+
+			this.mech2 = Math.random();
+			console.log("spawning type " + type);
+		}
+	}
+}
+
+
 class Spawner {
 	constructor() {
-		this.numPres = 20;
-		this.numSpike = 12;
+		this.numPres = 30;
+		this.numSpike = 20;
 		this.start = false;
 
-		this.delay = 120;
+		this.delay = 100;
 		this.delayTimer = 0;		
 
 		this.lastPresX = 0;
@@ -319,17 +397,23 @@ class Spawner {
 				this.delayTimer = 0;
 				
 				var temp = Math.random();
-				if (temp <= 0.45 && this.numSpike > 0) {
+				if (temp <= 0.5 && this.numSpike > 0) {
 
 					rockArray.push(new Rock(this.lastPresX-150+Math.floor(Math.random()*300), 
 						        -50, spike.width, spike.height, spike));
 					this.numSpike--;
 					console.log("spawner - created a rock");
 					this.deplayTimer = 100;
-				} else if (temp > 0.3 && this.numPres > 0) {
+				} else if (temp > 0.5 && this.numPres > 0) {
 					this.lastPresX = Math.floor(Math.random()*1200); 
-					presArray.push(new Present(this.lastPresX,
-				                 -50, img2.width, img2.height, img2));
+
+					var fuck = Math.random();
+					if (fuck <= 0.7) {
+						presArray.push(new Present(this.lastPresX, -50, img2.width, img2.height, img2));
+					} else {
+						presArray.push(new BluePresent(this.lastPresX,
+				                 -50, bluePres.width, bluePres.height, bluePres));
+					}
 					this.numPres--;
 					console.log("spawner - created a present");
 

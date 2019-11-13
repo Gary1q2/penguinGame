@@ -35,6 +35,8 @@ document.onkeyup = function(event) {
 		// Spawn normal present
 		case 49:
 			createType = "pres";
+
+			mechSpawn.spawnMech(1);
 			//presArray.push(new Present(Math.floor(Math.random()*1200),
 			//                     -50, img2.width, img2.height, img2));
 			break;
@@ -42,6 +44,7 @@ document.onkeyup = function(event) {
 		// Spawn blue present
 		case 50:
 			createType = "bluePres";
+			mechSpawn.spawnMech(2);
 			//presArray.push(new BluePresent(Math.floor(Math.random()*1200),
 			//                     -50, bluePres.width, bluePres.height, bluePres));
 			break;

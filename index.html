@@ -72,6 +72,8 @@ dash.src = "img/dash.png";
 var dashR = new Image();
 dashR.src = "img/dashR.png";
 
+var mechSpawn = new MechSpawner();
+
 function startGame() {
 
 	// hide the button
@@ -88,8 +90,10 @@ function startGame() {
 	var lastLoop = new Date();
 	var fps = -1;
 
-	var level1 = new Spawner();
-	level1.startSpawn();
+
+	//var level1 = new Spawner();
+	//level1.startSpawn();
+
 	function gameLoop(timestamp) {
 		if (gameState == "game") {
 			if (delay < 4) {
@@ -105,14 +109,20 @@ function startGame() {
 
 			ctx.drawImage(bg, 0, 0);
 
-			level1.update();
+			//level1.update();
+			mechSpawn.update();
 			player.update();
 
 			// Update position of all presents and let player collect them
 			for (var i = 0; i < presArray.length; i++) {
-				if (presArray[i].collideWith(player) && !presArray[i].dead && !player.stunned) {
-					presArray[i].dead = true;
-					num += 1;
+				if (presArray[i].collideWith(player) && !presArray[i].dead && !player.stunned && !presArray[i].hit) {
+
+					if (dashing) {
+						presArray[i].hitUp();
+					} else {
+						presArray[i].dead = true;
+						num += 1;
+					}
 				} 
 				presArray[i].update();
 			}
