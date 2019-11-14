@@ -36,7 +36,7 @@ document.onkeyup = function(event) {
 		case 49:
 			createType = "pres";
 
-			mechSpawn.spawnMech(1);
+			mechSpawn.spawnMech(4);
 			//presArray.push(new Present(Math.floor(Math.random()*1200),
 			//                     -50, img2.width, img2.height, img2));
 			break;
@@ -44,7 +44,6 @@ document.onkeyup = function(event) {
 		// Spawn blue present
 		case 50:
 			createType = "bluePres";
-			mechSpawn.spawnMech(2);
 			//presArray.push(new BluePresent(Math.floor(Math.random()*1200),
 			//                     -50, bluePres.width, bluePres.height, bluePres));
 			break;
@@ -69,6 +68,14 @@ document.onkeyup = function(event) {
 				//console.log("DASHED BOIZ");
 				canDash = false;
 				dashing = true;
+			}
+			break;
+
+		// Press w for wind
+		case 87:
+			for (var i = 0; i < presArray.length; i++) {
+				var wind = Math.ceil(Math.random()*2);
+				presArray[i].hsp = wind+2;
 			}
 			break;
 	}

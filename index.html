@@ -73,7 +73,7 @@ var dashR = new Image();
 dashR.src = "img/dashR.png";
 
 var mechSpawn = new MechSpawner();
-
+var player;
 function startGame() {
 
 	// hide the button
@@ -82,7 +82,7 @@ function startGame() {
 
 	console.log("Window loaded");
 
-	var player = new Player(600, 700, img.width, img.height, img);
+	player = new Player(600, 700, img.width, img.height, img);
 
 	var wait = 0;
 
@@ -90,6 +90,7 @@ function startGame() {
 	var lastLoop = new Date();
 	var fps = -1;
 
+	var mechTimer = 300;
 
 	//var level1 = new Spawner();
 	//level1.startSpawn();
@@ -110,6 +111,14 @@ function startGame() {
 			ctx.drawImage(bg, 0, 0);
 
 			//level1.update();
+			mechTimer++;
+			if (mechTimer >= 300) {
+				mechTimer = 0;
+				var rand = Math.ceil(Math.random()*4);
+				mechSpawn.spawnMech(rand);
+				console.log("mech auto spawned mech = " + rand);
+			}
+
 			mechSpawn.update();
 			player.update();
 
@@ -132,7 +141,7 @@ function startGame() {
 				rockArray[i].update();
 			}
 
-			if (lost >= 69) {
+			if (lost >= 3) {
 				gameState = "lost";
 			}
 
@@ -144,6 +153,7 @@ function startGame() {
 			ctx.fillText("Level: " + level, 800, 750);
 			ctx.fillText("stunned="+ player.stunned, 950, 750);
 			ctx.fillText("facing ="+player.facing,800,600);
+			ctx.fillText("["+Math.round(player.x)+","+Math.round(player.y)+"]", 1000, 50);
 
 			// Draw spawnerrr
 			if (createType == "rock") {

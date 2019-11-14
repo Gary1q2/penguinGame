@@ -80,6 +80,9 @@ class Present extends Entity {
 		this.chuteTimer = 0;
 
 		this.hit = false;
+
+		this.friction = 0.05;
+		this.hsp = 0;
 	}
 
 	update() {
@@ -102,7 +105,7 @@ class Present extends Entity {
 	}
 
 	hitUp() {
-		this.fallSpd = -7;
+		this.fallSpd = -10;
 		this.hit = true;
 	}
 
@@ -113,6 +116,10 @@ class Present extends Entity {
 
 	// Make it fall down
 	updateMovement() {
+		if (this.hsp > 0) {
+			this.hsp -= this.friction;
+		}
+
 		if (this.hit && this.fallSpd >= 0) {
 			this.hit = false;
 		}
@@ -124,6 +131,7 @@ class Present extends Entity {
 			}
 		}
 		this.y += this.fallSpd;
+		this.x += this.hsp;
 	}
 
 	// Check if it reached the bottom
@@ -322,6 +330,8 @@ class MechSpawner {
 	}
 	update() {
 		if (this.spawning) {
+
+			// Spawn green + blue present
 			if (this.mech == 1) {
 				if (this.timer == 0) {
 					//create a green present
@@ -332,6 +342,8 @@ class MechSpawner {
 					this.spawning = false;
 					console.log("back to idle state");
 				}
+
+			// Spawn green, blue and purple present
 			} else if (this.mech == 2) {
 				if (this.mech2 <= 0.3) {
 					if (this.timer == 0) {
@@ -361,6 +373,42 @@ class MechSpawner {
 						this.spawning = false;
 					}		
 				}
+
+			// Two green presents
+			} else if (this.mech == 3) {
+				if (this.timer == 0) {
+					presArray.push(new Present(300, -50, img2.width, img2.height, img2));
+				} else if (this.timer == 100) {
+					presArray.push(new Present(800, -50, img2.width, img.height, img2));
+					this.spawning = false;
+				}
+
+			// Rock predict the movement
+			} else if (this.mech == 4) {
+				if (this.timer == 0) {
+					presArray.push(new Present(this.mech5, -50, img2.width, img2.height, img2));
+				} else if (this.timer == 230) {
+					console.log("playerX = " + player.x);
+					console.log("playerHSP = " + player.hsp);
+					var xPos;
+					if (player.x - this.mech5 <= 200) {
+						xPos = this.mech5;
+					} else {
+						//predict movement
+						xPos = player.x+800/6*player.hsp
+						if (xPos < 0 || xPos > 1200) {
+							xPos = this.mech5;
+							console.log("xPos reset");
+						}			
+					}
+			
+					console.log("xPos = " + xPos);
+					rockArray.push(new Rock(xPos, -50, spike.width-10, spike.height-10, spike));
+					this.spawning = false;
+				}
+			}
+			if (this.timer == this.spikeRand) {
+				rockArray.push(new Rock(Math.random()*1200, -50, spike.width-10,spike.height-10,spike));
 			}
 			this.timer++;
 		}
@@ -374,6 +422,9 @@ class MechSpawner {
 			this.timer = 0;
 
 			this.mech2 = Math.random();
+			this.mech5 = Math.random()*1200;
+
+			this.spikeRand = Math.ceil(Math.random()*100);
 			console.log("spawning type " + type);
 		}
 	}
